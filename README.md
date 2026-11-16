@@ -28,7 +28,7 @@ python dashboard/app.py                                   # http://localhost:805
 pytest tests
 ```
 
-Docker (build not yet verified by the author, see status below):
+Docker (image build and the pipeline run verified on Windows with Docker Desktop):
 ```
 docker build -t game-warehouse:latest .
 docker run --rm game-warehouse:latest                                          # PySpark pipeline
@@ -46,6 +46,7 @@ docker run --rm -p 8050:8050 game-warehouse:latest python dashboard/app.py     #
 - Spark's `dropDuplicates` keeps an arbitrary row, which would not match pandas. Replaced with `row_number()` over file order.
 
 ## Honest status
-- Verified here: pandas pipeline, PySpark pipeline and parity (local mode), R script, dashboard renders, Lambda handler against moto, YAML parses.
-- **Not verified:** the Docker image build and the Kubernetes manifests were not run on a cluster (no Docker daemon or kubectl where this was built). Treat them as untested until you run `docker build` and `kubectl apply --dry-run=server`.
+- Verified (cloud sandbox): pandas pipeline, PySpark pipeline and parity (local mode), R script, dashboard renders, Lambda handler against moto, YAML parses.
+- Verified in Docker Desktop (Windows): the image builds and `docker run` executes the PySpark pipeline with the expected output (20,040 rows in, 19,960 loaded).
+- **Not verified:** the dashboard container and the Kubernetes manifests (`k8s/cronjob.yaml`) have not been applied to a cluster. Treat them as untested until run.
 - Not deployed to real AWS. Not run on Snowflake. The agent evaluation has not been run with a real API key.
