@@ -28,7 +28,7 @@ python dashboard/app.py                                   # http://localhost:805
 pytest tests
 ```
 
-Docker (image build and the pipeline run verified on Windows with Docker Desktop):
+Docker (image build, pipeline run and dashboard verified on Windows with Docker Desktop):
 ```
 docker build -t game-warehouse:latest .
 docker run --rm game-warehouse:latest                                          # PySpark pipeline
@@ -47,6 +47,6 @@ docker run --rm -p 8050:8050 game-warehouse:latest python dashboard/app.py     #
 
 ## Honest status
 - Verified (cloud sandbox): pandas pipeline, PySpark pipeline and parity (local mode), R script, dashboard renders, Lambda handler against moto, YAML parses.
-- Verified in Docker Desktop (Windows): the image builds and `docker run` executes the PySpark pipeline with the expected output (20,040 rows in, 19,960 loaded).
-- **Not verified:** the dashboard container and the Kubernetes manifests (`k8s/cronjob.yaml`) have not been applied to a cluster. Treat them as untested until run.
+- Verified in Docker Desktop (Windows): the image builds, `docker run` executes the PySpark pipeline with the expected output (20,040 rows in, 19,960 loaded), and the dashboard container serves the charts at localhost:8050.
+- **Not verified:** the Kubernetes manifests (`k8s/cronjob.yaml`) have not been applied to a cluster. Treat them as untested until run.
 - Not deployed to real AWS. Not run on Snowflake. The agent evaluation has not been run with a real API key.
