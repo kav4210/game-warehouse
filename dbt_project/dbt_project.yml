@@ -1,0 +1,8 @@
+name: game_warehouse
+version: '1.0'
+profile: game_warehouse
+model-paths: [models]
+models:
+  game_warehouse:
+    marts:
+      +materialized: table

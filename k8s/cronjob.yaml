@@ -1,0 +1,50 @@
+# Nightly PySpark run of the warehouse pipeline. Output lands on a mounted volume.
+apiVersion: batch/v1
+kind: CronJob
+metadata: {name: game-warehouse-nightly}
+spec:
+  schedule: "0 6 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: pipeline
+              image: game-warehouse:latest
+              imagePullPolicy: IfNotPresent
+              command: ["python", "src/spark_pipeline.py"]
+              resources:
+                requests: {cpu: "500m", memory: "1Gi"}
+                limits: {cpu: "2", memory: "2Gi"}
+              volumeMounts: [{name: out, mountPath: /app/data/spark_out}]
+          volumes:
+            - name: out
+              persistentVolumeClaim: {claimName: warehouse-out}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: warehouse-out}
+spec:
+  accessModes: [ReadWriteOnce]
+  resources: {requests: {storage: 1Gi}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: game-warehouse-dashboard}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: dashboard}}
+  template:
+    metadata: {labels: {app: dashboard}}
+    spec:
+      containers:
+        - name: dash
+          image: game-warehouse:latest
+          command: ["python", "dashboard/app.py"]
+          ports: [{containerPort: 8050}]
+          readinessProbe: {httpGet: {path: /, port: 8050}, initialDelaySeconds: 10}

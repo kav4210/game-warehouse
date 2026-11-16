@@ -1,0 +1,8 @@
+{
+  "quality": {
+    "duplicate_sale_ids": 40,
+    "negative_revenue": 25,
+    "orphan_game_ids": 15
+  },
+  "alerts": []
+}

@@ -1,0 +1,6 @@
+game_warehouse:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ../data/dbt_warehouse.duckdb

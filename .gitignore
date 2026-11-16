@@ -1,0 +1,9 @@
+__pycache__/
+.pytest_cache/
+data/spark_out/
+spark-warehouse/
+metastore_db/
+*.log
+dbt_project/target/
+dbt_project/logs/
+dbt_project/.user.yml

@@ -1,0 +1,26 @@
+version: 2
+models:
+  - name: mart_game_quarterly
+    description: Units and revenue (USD, synthetic) per game per quarter
+    columns:
+      - name: title
+        tests: [not_null]
+      - name: quarter
+        tests: [not_null, accepted_values: {arguments: {values: [1,2,3,4]}}]
+      - name: revenue
+        description: Sum of sale revenue in USD, never negative after cleaning
+        tests: [not_null]
+  - name: mart_region_channel
+    description: Units and revenue per region and channel
+    columns:
+      - name: region
+        tests: [not_null, accepted_values: {arguments: {values: [NA, EU, JP, OTHER]}}]
+      - name: channel
+        tests: [not_null, accepted_values: {arguments: {values: [digital, retail]}}]
+  - name: mart_engagement
+    description: Average active players and session length per game and region
+    columns:
+      - name: title
+        tests: [not_null]
+      - name: avg_active_players
+        tests: [not_null]
