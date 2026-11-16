@@ -14,6 +14,7 @@ A synthetic star-schema warehouse built two ways (pandas + SQLite, and PySpark),
 | `analysis/revenue_stats.R` | Base R: Welch t-test, ANOVA + Tukey, linear model with game fixed effects, chi-square on counts |
 | `dashboard/app.py` | Plotly Dash dashboard over the marts |
 | `src/lambda_handler.py` | Lambda that runs the pipeline and uploads marts to S3 (tested with moto) |
+| `src/flights/` | Real-data PySpark star schema on NYC flights 2013 (see section below) |
 | `dbt_project/` | dbt models and tests over the marts |
 | `agent/` | Tool-calling analytics agent (SQL + doc search); evaluation needs your own API key |
 | `Dockerfile`, `k8s/cronjob.yaml` | Container image, nightly CronJob, dashboard Deployment |
@@ -40,6 +41,32 @@ docker run --rm -p 8050:8050 game-warehouse:latest python dashboard/app.py     #
 - Genre explains quarterly revenue (ANOVA p < 1e-12); Tukey shows RPG and Fighting at the top.
 - Quarterly trend is not significant after game fixed effects (slope 462 per quarter, p = 0.09).
 - Channel mix is independent of region (chi-square on transaction counts, p = 0.42). A first version ran chi-square on revenue dollars and reported p < 2e-16, which is wrong because it treats each dollar as an observation. Fixed to use counts.
+
+## Real-data pipeline: NYC flights (src/flights/)
+The synthetic warehouse above is a method demo. This is the same approach on **real data**: all 336,776 flights out of EWR, JFK and LGA in 2013 (US Bureau of Transportation Statistics, via the `nycflights13` package), built as a PySpark star schema with 5 tables (fact_flights, dim_carrier, dim_airport, dim_plane, dim_date) and 4 marts.
+
+```
+python src/flights/ingest.py          # exports the real dataset to data/flights_raw/ (not committed)
+python src/flights/flights_spark.py   # quality report, star schema, marts -> data/flights_out/
+pytest tests/test_flights.py          # 6 tests, verified against independently computed pandas numbers
+```
+
+**Real data quality problems found and how they were handled** (measured, then rows kept, not dropped):
+| Issue | Rows | Handling |
+|---|---|---|
+| Cancelled flights (no departure time) | 8,255 | `status = cancelled`, excluded from delay metrics, included in cancel rate |
+| Diverted or unknown (departed, no arrival time) | 458 | `status = diverted` |
+| Missing tail number | 2,512 | mapped to an `UNKNOWN` plane member |
+| Destination not in the airports table (SJU, BQN, PSE, STT) | 7,602 | added as explicit "Unlisted airport" dimension members instead of dropping real flights |
+| Tail number not in the planes table | 50,094 | mapped to the `UNKNOWN` plane member |
+
+**What the marts show** (completed flights, 2013):
+- Delays build through the day: average departure delay is 0.7 min for 5am flights and 24.7 min for 7pm flights.
+- Regional carriers cancel the most: Endeavor Air 5.7%, ExpressJet 5.2%, Envoy 4.7% of flights, versus 0.7% for Delta. (SkyWest and Mesa show higher rates on tiny samples of 32 and 601 flights.)
+- On-time arrival among carriers with over 1,000 flights: best is US Airways at 82.0%, then Virgin America 81.8% and Delta 81.6%. Worst is ExpressJet at 68.5%.
+- EWR monthly delays peak in June and July (about 22 min) and bottom out in November (6.7 min); the mart includes a 3-month rolling average via a window function.
+
+Caveat: this is one year (2013) from three airports, and on-time means arrival within 15 minutes of schedule (the BTS definition). It is a descriptive analysis, not a causal one.
 
 ## Bugs found while building
 - pandas and Spark both treat the region code `NA` (North America) as missing by default. In pandas this broke 7,960 foreign keys. Fixed with `keep_default_na=False` in pandas and a sentinel `nullValue` in Spark, covered by tests.

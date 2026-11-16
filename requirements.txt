@@ -8,3 +8,4 @@ moto
 pyyaml
 dbt-core
 dbt-sqlite
+nycflights13

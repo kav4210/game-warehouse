@@ -7,3 +7,5 @@ metastore_db/
 dbt_project/target/
 dbt_project/logs/
 dbt_project/.user.yml
+data/flights_raw/
+data/flights_out/
