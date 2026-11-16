@@ -45,6 +45,7 @@ spec:
       containers:
         - name: dash
           image: game-warehouse:latest
+          imagePullPolicy: IfNotPresent
           command: ["python", "dashboard/app.py"]
           ports: [{containerPort: 8050}]
           readinessProbe: {httpGet: {path: /, port: 8050}, initialDelaySeconds: 10}
