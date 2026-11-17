@@ -23,7 +23,7 @@ pytest tests/test_flights.py          # 6 tests, verified against independently 
 **What the marts show** (completed flights, 2013):
 - Delays build through the day: average departure delay is 0.7 min for 5am flights and 24.7 min for 7pm flights.
 - Regional carriers cancel the most: Endeavor Air 5.7%, ExpressJet 5.2%, Envoy 4.7% of flights, versus 0.7% for Delta. (SkyWest and Mesa show higher rates on tiny samples of 32 and 601 flights.)
-- On-time arrival among carriers with over 1,000 flights: best is US Airways at 82.0%, then Virgin America 81.8% and Delta 81.6%. Worst is ExpressJet at 68.5%.
+- On-time arrival among carriers with over 1,000 flights: best is US Airways at 82.0%, then Virgin America 81.8% and Delta 81.6%. Worst is AirTran at 66.3% (3,260 flights), then ExpressJet at 68.5% (54,173 flights).
 - EWR monthly delays peak in June and July (about 22 min) and bottom out in November (6.7 min); the mart includes a 3-month rolling average via a window function.
 
 Caveat: this is one year (2013) from three airports, and on-time means arrival within 15 minutes of schedule (the BTS definition). It is a descriptive analysis, not a causal one.
